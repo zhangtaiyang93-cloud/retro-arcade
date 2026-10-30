@@ -32,18 +32,18 @@ export const ARCADE_GAMES: ArcadeGame[] = [
   },
   {
     id: 'game-2',
-    slug: 'pac-man',
-    title: 'Pac-Man',
-    tagline: 'Chomp the dots, outsmart the neon ghosts!',
-    author: 'Teammate 2',
-    genre: 'Classic Maze Chase',
-    icon: '🍒',
-    accentColor: '#ffe600', // Neon Yellow
-    cabinetColor: '#3a2e12',
-    status: 'Coming Soon',
-    ticketReward: '20 - 75 🎟️',
-    description: 'Navigate the glowing neon labyrinth, collect power pellets to turn the tables on ghosts, and rack up ticket rewards.',
-    controlsTip: 'Arrow keys or WASD to navigate the maze corridors.'
+    slug: 'chroma-chase',
+    title: 'NEON FEVER: CHROMA CHASE',
+    tagline: 'Outrun four digital creatures, then turn the chase around!',
+    author: 'Jiaqi (jyuan)',
+    genre: 'Neon Maze Chase (Pac-Man Style)',
+    icon: '🌀',
+    accentColor: '#8B5CF6', // Electric Violet
+    cabinetColor: '#190B35',
+    status: 'Ready',
+    ticketReward: 'Up to 275 🎟️',
+    description: 'Steer a shape-shifting energy orb through a glowing maze, collect every energy particle, and grab energy cores to reverse the chase and chomp creatures across three levels.',
+    controlsTip: 'Arrow keys or WASD. Touch D-pad or swipe on mobile.'
   },
   {
     id: 'game-3',
@@ -89,24 +89,12 @@ export const ARCADE_GAMES: ArcadeGame[] = [
     ticketReward: '15 - 60 🎟️',
     description: 'Classic arcade snake reimagined with synthwave grid visuals, glowing energy orbs, speed multipliers, and real ticket rewards.',
     controlsTip: 'Arrow keys or WASD to navigate, or on-screen D-Pad.'
-  },
-  {
-    id: 'game-6',
-    slug: 'chroma-chase',
-    title: 'NEON FEVER: CHROMA CHASE',
-    tagline: 'Outrun four digital creatures, then turn the chase around!',
-    author: 'Jiaqi',
-    genre: 'Neon Maze Chase',
-    icon: '🌀',
-    accentColor: '#8B5CF6', // Electric Violet
-    cabinetColor: '#190B35',
-    status: 'Ready',
-    ticketReward: 'Up to 275 🎟️',
-    description: 'Steer a shape-shifting energy orb through a glowing maze, collect every energy particle, and grab energy cores to reverse the chase across three levels.',
-    controlsTip: 'Arrow keys or WASD. Touch D-pad or swipe on mobile.'
   }
 ];
 
 export function getGameBySlug(slug: string): ArcadeGame | undefined {
+  if (slug === 'pac-man') {
+    return ARCADE_GAMES.find((g) => g.slug === 'chroma-chase');
+  }
   return ARCADE_GAMES.find((g) => g.slug === slug);
 }
