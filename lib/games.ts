@@ -59,6 +59,21 @@ export const ARCADE_GAMES: ArcadeGame[] = [
     ticketReward: 'Up to 50 🎟️',
     description: 'Keep the high-velocity energy sphere bouncing to shatter indestructible neon blocks and trigger ticket cascades.',
     controlsTip: 'Mouse, A/D, or Arrow keys to slide your paddle.'
+  },
+  {
+    id: 'game-4',
+    slug: 'neon-mario',
+    title: 'Super Neon Plumber',
+    tagline: 'Run, jump, bump ? blocks & conquer the flagpole!',
+    author: 'Taiyang',
+    genre: 'Side-Scrolling Platformer',
+    icon: '🍄',
+    accentColor: '#ff3b30', // Mario Red
+    cabinetColor: '#3a1414',
+    status: 'Ready',
+    ticketReward: '20 - 75 🎟️',
+    description: 'Classic side-scrolling platformer action! Stomp patrolling goombas, headbutt ? mystery blocks for shiny coins, and leap onto the finish flagpole to bank huge ticket rewards.',
+    controlsTip: 'A/D or Arrows to run, Space/W to jump. Stomp enemies from above!'
   }
 ];
 
