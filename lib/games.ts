@@ -20,14 +20,14 @@ export const ARCADE_GAMES: ArcadeGame[] = [
     slug: 'space-invaders',
     title: 'Space Invaders',
     tagline: 'Defend earth from pixelated alien waves!',
-    author: 'Teammate 1',
+    author: 'Caoyun Xu',
     genre: 'Retro Arcade Shooter',
     icon: '👾',
     accentColor: '#00ffcc', // Neon Cyan
     cabinetColor: '#162b4d',
-    status: 'Coming Soon',
-    ticketReward: '10 - 50 🎟️',
-    description: 'Battle waves of descending pixel invaders, shoot flying saucers for mystery bonus points, and claim your tickets.',
+    status: 'Ready',
+    ticketReward: '10 / 20 / 30 🎟️ per wave',
+    description: 'Battle waves of descending pixel invaders, dodge enemy lasers, and clear three waves to earn up to 60 tickets.',
     controlsTip: 'Arrow keys to steer, Spacebar to shoot lasers.'
   },
   {
@@ -50,18 +50,48 @@ export const ARCADE_GAMES: ArcadeGame[] = [
     slug: 'brick-breaker',
     title: 'Brick Breaker',
     tagline: 'Smash through neon brick barricades!',
-    author: 'Teammate 3',
+    author: 'Taiyang',
     genre: 'Arcade Paddle Action',
     icon: '🧱',
     accentColor: '#ff007f', // Neon Magenta
     cabinetColor: '#3b122f',
-    status: 'Coming Soon',
-    ticketReward: '15 - 60 🎟️',
+    status: 'Ready',
+    ticketReward: 'Up to 50 🎟️',
     description: 'Keep the high-velocity energy sphere bouncing to shatter indestructible neon blocks and trigger ticket cascades.',
-    controlsTip: 'Mouse or Left/Right keys to slide your paddle.'
+    controlsTip: 'Mouse, A/D, or Arrow keys to slide your paddle.'
   },
   {
     id: 'game-4',
+    slug: 'neon-mario',
+    title: 'Super Neon Plumber',
+    tagline: 'Run, jump, bump ? blocks & conquer the flagpole!',
+    author: 'Taiyang',
+    genre: 'Side-Scrolling Platformer',
+    icon: '🍄',
+    accentColor: '#ff3b30', // Mario Red
+    cabinetColor: '#3a1414',
+    status: 'Ready',
+    ticketReward: '20 - 75 🎟️',
+    description: 'Classic side-scrolling platformer action! Stomp patrolling goombas, headbutt ? mystery blocks for shiny coins, and leap onto the finish flagpole to bank huge ticket rewards.',
+    controlsTip: 'A/D or Arrows to run, Space/W to jump. Stomp enemies from above!'
+  },
+  {
+    id: 'game-5',
+    slug: 'neon-snake',
+    title: 'Cyber Neon Snake',
+    tagline: 'Slither through the grid, feast on energy orbs & grow!',
+    author: 'Taiyang',
+    genre: 'Retro Grid Action',
+    icon: '🐍',
+    accentColor: '#39ff14', // Neon Green
+    cabinetColor: '#0d2818',
+    status: 'Ready',
+    ticketReward: '15 - 60 🎟️',
+    description: 'Classic arcade snake reimagined with synthwave grid visuals, glowing energy orbs, speed multipliers, and real ticket rewards.',
+    controlsTip: 'Arrow keys or WASD to navigate, or on-screen D-Pad.'
+  },
+  {
+    id: 'game-6',
     slug: 'chroma-chase',
     title: 'NEON FEVER: CHROMA CHASE',
     tagline: 'Outrun four digital creatures, then turn the chase around!',
