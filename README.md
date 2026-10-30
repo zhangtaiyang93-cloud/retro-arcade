@@ -89,3 +89,13 @@ Open a Pull Request on GitHub and request a review from your team!
 1. Go to repository **Settings** &rarr; **Collaborators**.
 2. Click **Add people** and invite your teammates.
 3. Also invite instructor Elizabeth: `elizabethylin@gmail.com`.
+
+## Space Invaders
+
+Implemented on `caoyunxu/space-invaders`. Open `/games/space-invaders`.
+Use Left/Right or A/D to move, hold Space to fire, and P/Escape to pause.
+Touch controls are available below the playfield. Leaving the browser pauses the game.
+Clear three waves to earn 10, 20, then 30 tickets (60 total), awarded immediately
+through the shared wallet once per wave. Losing or replaying never re-awards an old wave.
+
+Run engine regression checks with `node tests/space-invaders.cjs`.
