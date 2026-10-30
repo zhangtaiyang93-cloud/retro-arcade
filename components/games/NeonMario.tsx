@@ -359,9 +359,9 @@ export default function NeonMario() {
       // Physics & Updates
       if (engine.running) {
         // Player X Acceleration & Friction
-        const accel = 0.6;
-        const friction = 0.84;
-        const maxSpeed = 5.0;
+        const accel = 0.26;
+        const friction = 0.82;
+        const maxSpeed = 2.8;
 
         if (keys.left) {
           player.vx -= accel;
@@ -378,7 +378,7 @@ export default function NeonMario() {
         player.x += player.vx;
 
         if (Math.abs(player.vx) > 0.5 && player.isGrounded) {
-          player.runAnim += 0.25;
+          player.runAnim += Math.abs(player.vx) * 0.08;
         }
 
         // Horizontal Platform Collisions
@@ -400,9 +400,9 @@ export default function NeonMario() {
         }
 
         // Player Jump & Gravity
-        const gravity = 0.55;
+        const gravity = 0.52;
         if (keys.jump && player.isGrounded) {
-          player.vy = -12.0;
+          player.vy = -10.8;
           player.isGrounded = false;
           playSound('jump');
           // Jump dust particles
