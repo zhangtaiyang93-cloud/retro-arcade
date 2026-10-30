@@ -74,6 +74,21 @@ export const ARCADE_GAMES: ArcadeGame[] = [
     ticketReward: '20 - 75 🎟️',
     description: 'Classic side-scrolling platformer action! Stomp patrolling goombas, headbutt ? mystery blocks for shiny coins, and leap onto the finish flagpole to bank huge ticket rewards.',
     controlsTip: 'A/D or Arrows to run, Space/W to jump. Stomp enemies from above!'
+  },
+  {
+    id: 'game-5',
+    slug: 'neon-snake',
+    title: 'Cyber Neon Snake',
+    tagline: 'Slither through the grid, feast on energy orbs & grow!',
+    author: 'Taiyang',
+    genre: 'Retro Grid Action',
+    icon: '🐍',
+    accentColor: '#39ff14', // Neon Green
+    cabinetColor: '#0d2818',
+    status: 'Ready',
+    ticketReward: '15 - 60 🎟️',
+    description: 'Classic arcade snake reimagined with synthwave grid visuals, glowing energy orbs, speed multipliers, and real ticket rewards.',
+    controlsTip: 'Arrow keys or WASD to navigate, or on-screen D-Pad.'
   }
 ];
 
