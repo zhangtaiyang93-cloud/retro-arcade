@@ -59,6 +59,21 @@ export const ARCADE_GAMES: ArcadeGame[] = [
     ticketReward: '15 - 60 🎟️',
     description: 'Keep the high-velocity energy sphere bouncing to shatter indestructible neon blocks and trigger ticket cascades.',
     controlsTip: 'Mouse or Left/Right keys to slide your paddle.'
+  },
+  {
+    id: 'game-4',
+    slug: 'chroma-chase',
+    title: 'NEON FEVER: CHROMA CHASE',
+    tagline: 'Outrun four digital creatures, then turn the chase around!',
+    author: 'Jiaqi',
+    genre: 'Neon Maze Chase',
+    icon: '🌀',
+    accentColor: '#8B5CF6', // Electric Violet
+    cabinetColor: '#190B35',
+    status: 'Ready',
+    ticketReward: 'Up to 275 🎟️',
+    description: 'Steer a shape-shifting energy orb through a glowing maze, collect every energy particle, and grab energy cores to reverse the chase across three levels.',
+    controlsTip: 'Arrow keys or WASD. Touch D-pad or swipe on mobile.'
   }
 ];
 
