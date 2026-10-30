@@ -89,6 +89,21 @@ export const ARCADE_GAMES: ArcadeGame[] = [
     ticketReward: '15 - 60 🎟️',
     description: 'Classic arcade snake reimagined with synthwave grid visuals, glowing energy orbs, speed multipliers, and real ticket rewards.',
     controlsTip: 'Arrow keys or WASD to navigate, or on-screen D-Pad.'
+  },
+  {
+    id: 'game-6',
+    slug: 'chroma-chase',
+    title: 'NEON FEVER: CHROMA CHASE',
+    tagline: 'Outrun four digital creatures, then turn the chase around!',
+    author: 'Jiaqi',
+    genre: 'Neon Maze Chase',
+    icon: '🌀',
+    accentColor: '#8B5CF6', // Electric Violet
+    cabinetColor: '#190B35',
+    status: 'Ready',
+    ticketReward: 'Up to 275 🎟️',
+    description: 'Steer a shape-shifting energy orb through a glowing maze, collect every energy particle, and grab energy cores to reverse the chase across three levels.',
+    controlsTip: 'Arrow keys or WASD. Touch D-pad or swipe on mobile.'
   }
 ];
 
