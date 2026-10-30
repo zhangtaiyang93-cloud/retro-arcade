@@ -1,0 +1,11 @@
+.game { width: 100%; color: #c2e8ed; }
+.hud { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; padding: 14px 0; font-size: 1.1rem; color: #00ffcc; }
+.stage { position: relative; width: 100%; background: #060b19; border: 1px solid #00ffcc66; border-radius: 5px; overflow: hidden; }
+.canvas { display: block; width: 100%; height: auto; outline-offset: -4px; }
+.overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 18px; padding: 18px; background: #060b19d9; text-align: center; }
+.overlay h3 { color: #00ffcc; font-size: clamp(1rem, 3vw, 1.5rem); line-height: 1.6; }
+.overlay p { max-width: 400px; font-size: clamp(1rem, 3vw, 1.3rem); }
+.controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 16px; }
+.controls button { touch-action: none; user-select: none; min-width: 60px; min-height: 44px; }
+.help { text-align: center; margin-top: 12px; font-size: 1rem; color: #a5b4cc; }
+@media (max-width: 500px) { .controls { gap: 8px; } .controls button { font-size: .65rem; padding: 10px; } .overlay { gap: 10px; } }

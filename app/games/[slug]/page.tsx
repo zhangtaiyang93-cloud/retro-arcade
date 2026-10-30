@@ -2,9 +2,10 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { useParams, notFound } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { getGameBySlug, ARCADE_GAMES } from '@/lib/games';
 import { useTickets } from '@/context/TicketContext';
+import SpaceInvaders from '@/components/games/SpaceInvaders';
 
 export default function GameCabinetPage() {
   const params = useParams();
@@ -87,8 +88,8 @@ export default function GameCabinetPage() {
         </div>
 
         {/* CRT Gaming Screen Area */}
-        <div style={{ padding: '30px' }}>
-          <div
+        <div style={{ padding: 'clamp(10px, 3vw, 30px)' }}>
+          {slug === 'space-invaders' ? <SpaceInvaders /> : <div
             className="crt-screen"
             style={{
               minHeight: '360px',
@@ -153,7 +154,7 @@ export default function GameCabinetPage() {
                 🎁 SPEND AT PRIZE SHOP
               </Link>
             </div>
-          </div>
+          </div>}
         </div>
 
         {/* Physical Cabinet Control Deck Illustration */}

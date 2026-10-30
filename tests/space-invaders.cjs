@@ -1,0 +1,34 @@
+const { mkdtempSync, rmSync } = require('node:fs');
+const { tmpdir } = require('node:os');
+const path = require('node:path');
+const { execFileSync } = require('node:child_process');
+const output = mkdtempSync(path.join(tmpdir(), 'arcade-engine-'));
+process.on('exit', () => rmSync(output, { recursive: true, force: true }));
+execFileSync(process.execPath, [require.resolve('typescript/bin/tsc'), 'lib/space-invaders.ts', '--outDir', output, '--module', 'commonjs', '--target', 'ES2017', '--skipLibCheck'], { cwd: path.join(__dirname, '..') });
+const { createGame, stepGame } = require(path.join(output, 'space-invaders.js'));
+const assert = require('node:assert/strict');
+const idle = { left: false, right: false, fire: false };
+const g = createGame(); g.phase = 'playing';
+for (const reward of [10, 20, 30]) {
+  g.aliens = [{ x: 100, y: 100, row: 0 }];
+  g.shots = [{ x: 100, y: 100 }];
+  assert.equal(stepGame(g, 0, idle), reward);
+  assert.equal(stepGame(g, 0, idle), 0, 'reward is not repeated');
+}
+assert.equal(g.earned, 60); assert.equal(g.phase, 'won');
+const paused = createGame(); paused.phase = 'paused';
+assert.equal(stepGame(paused, .04, { left: true, right: false, fire: true }), 0);
+assert.equal(paused.player, 320); assert.equal(paused.shots.length, 0);
+const loss = createGame(); loss.phase = 'playing'; loss.lives = 1;
+loss.bombs = [{ x: 320, y: 390 }];
+assert.equal(stepGame(loss, 0, idle), 0); assert.equal(loss.phase, 'over');
+assert.equal(stepGame(loss, .04, idle), 0); assert.equal(loss.lives, 0);
+const shield = createGame(); shield.phase = 'playing';
+shield.bombs = [{ x: 320, y: 390 }, { x: 320, y: 390 }];
+stepGame(shield, 0, idle); assert.equal(shield.lives, 2, 'simultaneous hits cost one life');
+const invasion = createGame(); invasion.phase = 'playing'; invasion.aliens[0].y = 374;
+stepGame(invasion, 0, idle); assert.equal(invasion.phase, 'over');
+const bounds = createGame(); bounds.phase = 'playing'; bounds.player = 20;
+stepGame(bounds, 20, { ...idle, left: true }); assert.equal(bounds.player, 20);
+assert.equal(createGame().earned, 0); assert.equal(createGame().score, 0);
+console.log('Passed: wave payouts once, victory, pause, loss, invulnerability, invasion, bounds and restart.');

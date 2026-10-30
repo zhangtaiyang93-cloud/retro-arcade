@@ -20,14 +20,14 @@ export const ARCADE_GAMES: ArcadeGame[] = [
     slug: 'space-invaders',
     title: 'Space Invaders',
     tagline: 'Defend earth from pixelated alien waves!',
-    author: 'Teammate 1',
+    author: 'Caoyun Xu',
     genre: 'Retro Arcade Shooter',
     icon: '👾',
     accentColor: '#00ffcc', // Neon Cyan
     cabinetColor: '#162b4d',
-    status: 'Coming Soon',
-    ticketReward: '10 - 50 🎟️',
-    description: 'Battle waves of descending pixel invaders, shoot flying saucers for mystery bonus points, and claim your tickets.',
+    status: 'Ready',
+    ticketReward: '10 / 20 / 30 🎟️ per wave',
+    description: 'Battle waves of descending pixel invaders, dodge enemy lasers, and clear three waves to earn up to 60 tickets.',
     controlsTip: 'Arrow keys to steer, Spacebar to shoot lasers.'
   },
   {
