@@ -50,15 +50,15 @@ export const ARCADE_GAMES: ArcadeGame[] = [
     slug: 'brick-breaker',
     title: 'Brick Breaker',
     tagline: 'Smash through neon brick barricades!',
-    author: 'Teammate 3',
+    author: 'Taiyang',
     genre: 'Arcade Paddle Action',
     icon: '🧱',
     accentColor: '#ff007f', // Neon Magenta
     cabinetColor: '#3b122f',
-    status: 'Coming Soon',
-    ticketReward: '15 - 60 🎟️',
+    status: 'Ready',
+    ticketReward: 'Up to 50 🎟️',
     description: 'Keep the high-velocity energy sphere bouncing to shatter indestructible neon blocks and trigger ticket cascades.',
-    controlsTip: 'Mouse or Left/Right keys to slide your paddle.'
+    controlsTip: 'Mouse, A/D, or Arrow keys to slide your paddle.'
   }
 ];
 
