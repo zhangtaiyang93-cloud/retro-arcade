@@ -1,3 +1,4 @@
+import { ECONOMY } from '@/lib/economy';
 // Game rules with no React, canvas or audio. The UI advances it with step() and reacts to drainEvents().
 
 import { GAME, LEVELS, SCORE } from './config';
@@ -75,6 +76,8 @@ export const positionOf = (actor: Actor) => {
 export class ChromaChaseGame {
   status: Status = 'title';
   score = 0;
+  roundSeconds: number = ECONOMY.mazeSeconds;
+  timedOut = false;
   lives: number = GAME.startingLives;
   /** Zero-based index into LEVELS. */
   level = 0;
@@ -128,6 +131,17 @@ export class ChromaChaseGame {
     const drained = this.events;
     this.events = [];
     return drained;
+  }
+
+  // Wall time continues during pauses and between levels.
+  elapseWallTime(seconds: number) {
+    if (this.status === 'title' || this.status === 'gameover' || this.status === 'victory') return;
+    this.roundSeconds = Math.max(0, this.roundSeconds - Math.max(0, seconds));
+    if (this.roundSeconds === 0) {
+      this.timedOut = true;
+      this.status = 'gameover';
+      this.events.push({ type: 'gameOver' });
+    }
   }
 
   step(dt: number) {

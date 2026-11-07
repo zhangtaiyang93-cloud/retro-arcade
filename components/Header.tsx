@@ -7,7 +7,7 @@ import { useTickets } from '@/context/TicketContext';
 
 export default function Header() {
   const pathname = usePathname();
-  const { tickets, addTickets, resetTickets, lastTransactionMessage } = useTickets();
+  const { tickets, lastTransactionMessage } = useTickets();
   const [showWalletMenu, setShowWalletMenu] = useState(false);
 
   return (
@@ -50,7 +50,7 @@ export default function Header() {
           <button
             onClick={() => setShowWalletMenu(!showWalletMenu)}
             className="ticket-badge"
-            title="Click to manage tickets or test wallet"
+            title="View ticket wallet"
             style={{ cursor: 'pointer', background: 'transparent' }}
           >
             <span>🎟️</span>
@@ -76,33 +76,12 @@ export default function Header() {
               }}
             >
               <div className="pixel-text" style={{ fontSize: '0.65rem', color: '#ffe600', marginBottom: '8px', borderBottom: '1px solid #333', paddingBottom: '6px' }}>
-                TICKET WALLET TOOLS
+                TICKET WALLET
               </div>
               <div style={{ fontSize: '0.9rem', color: '#aaa', marginBottom: '10px' }}>
                 Balance: <strong style={{ color: '#fff' }}>{tickets} 🎟️</strong>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <button
-                  onClick={() => {
-                    addTickets(10, 'Bonus Cheat Code');
-                    setShowWalletMenu(false);
-                  }}
-                  className="arcade-btn"
-                  style={{ fontSize: '0.65rem', padding: '6px 8px', width: '100%' }}
-                >
-                  +10 FREE TICKETS
-                </button>
-                <button
-                  onClick={() => {
-                    resetTickets();
-                    setShowWalletMenu(false);
-                  }}
-                  className="arcade-btn arcade-btn-pink"
-                  style={{ fontSize: '0.65rem', padding: '6px 8px', width: '100%' }}
-                >
-                  RESET WALLET (25)
-                </button>
-              </div>
+              <p style={{ color: '#a0aec0', fontSize: '1rem' }}>Play free games to earn tickets. Slots cost 50 per spin.</p>
             </div>
           )}
         </div>

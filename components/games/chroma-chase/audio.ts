@@ -1,3 +1,4 @@
+import { effectsEnabled } from '@/lib/chip-audio';
 // Original sound effects synthesized with the Web Audio API. Nothing plays until a user gesture calls unlock().
 
 export type SoundName = 'particle' | 'core' | 'caught' | 'hit' | 'blink' | 'go' | 'levelClear' | 'victory' | 'gameOver';
@@ -34,7 +35,7 @@ export class SynthAudio {
   }
 
   play(name: SoundName) {
-    if (!this.context || this.muted) return;
+    if (!this.context || this.muted || !effectsEnabled()) return;
     switch (name) {
       case 'particle': {
         const now = this.context.currentTime;

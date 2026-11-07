@@ -1,0 +1,24 @@
+Music: Eric Skiff - Underclocked (underunderclocked mix) - Resistor Anthems
+Available at https://ericskiff.com/music/
+
+License: Creative Commons Attribution 4.0 International (CC BY 4.0)
+https://creativecommons.org/licenses/by/4.0/
+Legal code: https://creativecommons.org/licenses/by/4.0/legalcode.en
+
+Downloaded directly from the composer's official download link:
+https://ericskiff.com/music/Resistor%20Anthems/02%20Underclocked%20%28underunderclocked%20mix%29.mp3
+Verified on 2026-11-07. The official page explicitly offers all songs under CC BY 4.0.
+This permits commercial and noncommercial use with the required attribution.
+No endorsement by the composer is implied.
+
+The recording is unmodified. The game loops playback and adjusts playback volume.
+SHA-256: 95ee8823b64a868f326585c860945d2b41fb46529a2c1e2d3650ca2f02aeb834
+
+Human authorship corroboration:
+The composer describes making this music using a vintage Game Boy and Nanoloop
+on his official music page. Free Music Archive also identifies this recording
+as not AI-generated, with a release listing dated April 19, 2011:
+https://freemusicarchive.org/music/Eric_Skiff/Resistor_Anthems/eric_skiff_-_02_-_underclocked_underunderclocked_mix/
+
+The short interface effects are synthesized separately; this credit applies
+to the background recording, not to the game artwork, code or sound effects.

@@ -11,7 +11,7 @@ export default function GameCabinetPage() {
   const params = useParams();
   const slug = params?.slug as string;
   const game = getGameBySlug(slug);
-  const { tickets, addTickets } = useTickets();
+  const { tickets } = useTickets();
 
   if (!game) {
     return (
@@ -143,13 +143,7 @@ export default function GameCabinetPage() {
 
             {/* Interactive Test Button */}
             <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'center' }}>
-              <button
-                onClick={() => addTickets(25, `${game.title} Victory Test`)}
-                className="arcade-btn arcade-btn-yellow"
-                style={{ fontSize: '0.8rem' }}
-              >
-                🎮 TEST WIN TICKETS (+25 🎟️)
-              </button>
+
               <Link href="/prizes" className="arcade-btn arcade-btn-pink" style={{ fontSize: '0.8rem' }}>
                 🎁 SPEND AT PRIZE SHOP
               </Link>

@@ -16,6 +16,21 @@ export interface ArcadeGame {
 
 export const ARCADE_GAMES: ArcadeGame[] = [
   {
+    id: 'game-6',
+    slug: 'neon-slots',
+    title: 'NEON LUCK',
+    tagline: 'One spin could change your night.',
+    author: 'Ruby Pann',
+    genre: 'High-Stakes Ticket Slots',
+    icon: '🎰',
+    accentColor: '#ffe600',
+    cabinetColor: '#302018',
+    status: 'Ready',
+    ticketReward: '0 – 10,000 🎟️',
+    description: 'Stake 50 tickets on three neon reels. Break even, multiply your tickets, or lose your stake. Triple sevens return 10,000 tickets!',
+    controlsTip: '50 tickets per spin. Click or tap SPIN.'
+  },
+  {
     id: 'game-1',
     slug: 'space-invaders',
     title: 'Space Invaders',
@@ -26,8 +41,8 @@ export const ARCADE_GAMES: ArcadeGame[] = [
     accentColor: '#00ffcc', // Neon Cyan
     cabinetColor: '#162b4d',
     status: 'Ready',
-    ticketReward: '10 / 20 / 30 🎟️ per wave',
-    description: 'Battle waves of descending pixel invaders, dodge enemy lasers, and clear three waves to earn up to 60 tickets.',
+    ticketReward: '1 / alien + 6–18 / wave',
+    description: 'Survive unlimited waves of pixel invaders. Bank tickets for each alien and wave; enemies get faster as you survive.',
     controlsTip: 'Arrow keys to steer, Spacebar to shoot lasers.'
   },
   {
@@ -41,8 +56,8 @@ export const ARCADE_GAMES: ArcadeGame[] = [
     accentColor: '#8B5CF6', // Electric Violet
     cabinetColor: '#190B35',
     status: 'Ready',
-    ticketReward: 'Up to 275 🎟️',
-    description: 'Steer a shape-shifting energy orb through a glowing maze, collect every energy particle, and grab energy cores to reverse the chase and chomp creatures across three levels.',
+    ticketReward: 'Up to 191 🎟️ / 180s',
+    description: 'A 180-second maze challenge: 1 ticket per 6 pickups, level bonuses of 20/25/25, plus 10 for each no-damage clear.',
     controlsTip: 'Arrow keys or WASD. Touch D-pad or swipe on mobile.'
   },
   {
@@ -56,8 +71,8 @@ export const ARCADE_GAMES: ArcadeGame[] = [
     accentColor: '#ff007f', // Neon Magenta
     cabinetColor: '#3b122f',
     status: 'Ready',
-    ticketReward: 'Up to 50 🎟️',
-    description: 'Keep the high-velocity energy sphere bouncing to shatter indestructible neon blocks and trigger ticket cascades.',
+    ticketReward: 'Up to 99 🎟️ / 120s',
+    description: '120 seconds to clear 40 neon bricks. Bank 1 ticket per brick plus score rewards, with a 20-ticket clear bonus.',
     controlsTip: 'Mouse, A/D, or Arrow keys to slide your paddle.'
   },
   {
@@ -71,8 +86,8 @@ export const ARCADE_GAMES: ArcadeGame[] = [
     accentColor: '#ff3b30', // Mario Red
     cabinetColor: '#3a1414',
     status: 'Ready',
-    ticketReward: '20 - 75 🎟️',
-    description: 'Classic side-scrolling platformer action! Stomp patrolling goombas, headbutt ? mystery blocks for shiny coins, and leap onto the finish flagpole to bank huge ticket rewards.',
+    ticketReward: 'Up to 62 🎟️ / 90s',
+    description: 'A free 90-second platform challenge. Collect coins, stomp enemies and reach the flag for a 20-ticket bonus. Progress banks live.',
     controlsTip: 'A/D or Arrows to run, Space/W to jump. Stomp enemies from above!'
   },
   {
@@ -86,8 +101,8 @@ export const ARCADE_GAMES: ArcadeGame[] = [
     accentColor: '#39ff14', // Neon Green
     cabinetColor: '#0d2818',
     status: 'Ready',
-    ticketReward: '15 - 60 🎟️',
-    description: 'Classic arcade snake reimagined with synthwave grid visuals, glowing energy orbs, speed multipliers, and real ticket rewards.',
+    ticketReward: '2 / orb · 5 / gold',
+    description: 'Endless high-speed survival. Bank 2 tickets per orb and 5 per golden orb; movement accelerates as your snake grows.',
     controlsTip: 'Arrow keys or WASD to navigate, or on-screen D-Pad.'
   }
 ];

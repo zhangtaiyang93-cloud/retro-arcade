@@ -5,11 +5,13 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test": "node tests/night.cjs && node tests/hall.cjs && node tests/slots.cjs && node tests/economy.cjs && node tests/space-invaders.cjs && node tests/chip-audio.cjs",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.3",
-    "next": "15.1.11",
+    "next": "15.5.29",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
@@ -19,5 +21,13 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": "24.x"
+  },
+  "overrides": {
+    "next": {
+      "postcss": "8.5.32"
+    }
   }
 }

@@ -83,7 +83,7 @@ export default function BrickBreakerPage() {
             🕹️ <strong>Controls:</strong> Mouse Move, A/D, or Arrow Keys. Mobile touch supported.
           </div>
           <div style={{ color: '#ffe600' }}>
-            🎟️ <strong>Rewards:</strong> 1 Ticket per 60 Points + 15 Victory Bonus!
+            🎟️ <strong>Rewards:</strong> 120s · 1 per brick + 1 per 120 score + 20 clear bonus.
           </div>
         </div>
       </div>

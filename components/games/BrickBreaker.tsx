@@ -1,9 +1,13 @@
 'use client';
+import { effectsEnabled } from '@/lib/chip-audio';
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useTickets } from '@/context/TicketContext';
 import confetti from 'canvas-confetti';
+import { brickReward } from '@/lib/economy';
+import { useCabinetBank } from './useCabinetBank';
+import RoundStatus from './RoundStatus';
 
 interface Brick {
   x: number;
@@ -36,7 +40,11 @@ interface FloatingText {
 
 export default function BrickBreaker() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { tickets, addTickets } = useTickets();
+  const { tickets } = useTickets();
+  const { startBank, updateBank, banked } = useCabinetBank('BrickBreaker');
+  const [secondsLeft, setSecondsLeft] = useState(120);
+  const deadline = useRef(0);
+  const timedOut = useRef(false);
 
   // Game UI States
   const [gameState, setGameState] = useState<'idle' | 'playing' | 'gameover' | 'victory'>('idle');
@@ -57,9 +65,9 @@ export default function BrickBreaker() {
 
   // Play retro synthesized sound
   const playSound = useCallback((type: 'hit' | 'paddle' | 'wall' | 'lose' | 'win' | 'ticket') => {
-    if (isMuted) return;
+    if (isMuted || !effectsEnabled()) return;
     try {
-      if (!audioCtxRef.current) {
+      if (!audioCtxRef.current || audioCtxRef.current.state === 'closed') {
         const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
         audioCtxRef.current = new AudioContextClass();
       }
@@ -188,10 +196,9 @@ export default function BrickBreaker() {
     if (hasAwardedTicketsRef.current) return; // Prevent double award
     hasAwardedTicketsRef.current = true;
 
-    // 1 ticket per 60 points, plus 15 bonus for victory
-    const ticketsWon = Math.max(5, Math.floor(finalScore / 60) + (isWin ? 15 : 0));
+    // Achievement-based tickets, already banked during play; no death bonus.
+    const ticketsWon = updateBank(brickReward(finalScore, engineRef.current.bricks.filter(b => !b.alive).length, isWin), true);
     setEarnedTicketsThisRound(ticketsWon);
-    addTickets(ticketsWon, `Brick Breaker ${isWin ? 'Victory' : 'Score'}`);
     playSound('ticket');
 
     if (isWin) {
@@ -201,11 +208,15 @@ export default function BrickBreaker() {
         origin: { y: 0.55 }
       });
     }
-  }, [addTickets, playSound]);
+  }, [updateBank, playSound]);
 
   // Start or Restart game
   const startGame = useCallback(() => {
     hasAwardedTicketsRef.current = false;
+    startBank();
+    timedOut.current = false;
+    deadline.current = performance.now() + 120000;
+    setSecondsLeft(120);
     setEarnedTicketsThisRound(0);
 
     const engine = engineRef.current;
@@ -227,7 +238,7 @@ export default function BrickBreaker() {
     setLives(3);
     setCombo(0);
     setGameState('playing');
-  }, [createBricks]);
+  }, [createBricks, startBank]);
 
   // Main 60FPS Game Loop
   useEffect(() => {
@@ -237,10 +248,26 @@ export default function BrickBreaker() {
     if (!ctx) return;
 
     let animId = 0;
+    let lastFrame = 0;
 
-    const gameLoop = () => {
+    const gameLoop = (timestamp: number) => {
+      // Normalize the original frame-based physics to at most 60 updates/sec.
+      if (lastFrame && timestamp - lastFrame < 1000 / 60 - 0.5) { animId = requestAnimationFrame(gameLoop); return; }
+      lastFrame = timestamp;
       const engine = engineRef.current;
       const { paddle, ball, bricks, particles, floatingTexts, keys } = engine;
+
+      if (engine.running) {
+        const remaining = Math.max(0, Math.ceil((deadline.current - performance.now()) / 1000));
+        setSecondsLeft(remaining);
+        updateBank(brickReward(engine.score, engine.bricks.filter(b => !b.alive).length, false));
+        if (remaining === 0) {
+          timedOut.current = true;
+          engine.running = false;
+          setGameState('gameover');
+          finalizeTickets(engine.score, false);
+        }
+      }
 
       // Clear Canvas
       ctx.fillStyle = '#0a0a14';
@@ -324,12 +351,9 @@ export default function BrickBreaker() {
         }
 
         // Ball - Bricks Collision
-        let hitBrick = false;
-        let remainingBricks = 0;
 
         for (const brick of bricks) {
           if (!brick.alive) continue;
-          remainingBricks++;
 
           if (
             ball.x + ball.radius >= brick.x &&
@@ -338,8 +362,6 @@ export default function BrickBreaker() {
             ball.y - ball.radius <= brick.y + brick.height
           ) {
             brick.alive = false;
-            remainingBricks--;
-            hitBrick = true;
             ball.vy = -ball.vy;
 
             // Combo & Points
@@ -382,7 +404,7 @@ export default function BrickBreaker() {
         }
 
         // Victory Condition Check: All bricks destroyed!
-        if (remainingBricks === 0) {
+        if (bricks.every(brick => !brick.alive)) {
           engine.running = false;
           setGameState('victory');
           playSound('win');
@@ -511,7 +533,7 @@ export default function BrickBreaker() {
     const handleMouseMove = (e: MouseEvent) => {
       if (!canvas) return;
       const rect = canvas.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
+      const mouseX = (e.clientX - rect.left) * canvas.width / rect.width;
       const paddle = engineRef.current.paddle;
       paddle.x = mouseX - paddle.width / 2;
     };
@@ -520,7 +542,7 @@ export default function BrickBreaker() {
     const handleTouchMove = (e: TouchEvent) => {
       if (!canvas || e.touches.length === 0) return;
       const rect = canvas.getBoundingClientRect();
-      const touchX = e.touches[0].clientX - rect.left;
+      const touchX = (e.touches[0].clientX - rect.left) * canvas.width / rect.width;
       const paddle = engineRef.current.paddle;
       paddle.x = touchX - paddle.width / 2;
     };
@@ -531,7 +553,7 @@ export default function BrickBreaker() {
     canvas.addEventListener('touchmove', handleTouchMove, { passive: true });
 
     // Initial bricks
-    engineRef.current.bricks = createBricks();
+    if (!engineRef.current.bricks.length) engineRef.current.bricks = createBricks();
 
     animId = requestAnimationFrame(gameLoop);
 
@@ -546,10 +568,11 @@ export default function BrickBreaker() {
         audioCtxRef.current.close().catch(() => {});
       }
     };
-  }, [createBricks, finalizeTickets, gameState, playSound, startGame]);
+  }, [createBricks, finalizeTickets, gameState, playSound, startGame, updateBank]);
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
+      <RoundStatus seconds={secondsLeft} banked={banked} active={gameState === 'playing'} rules="120s round. 1 per brick + 1 per 120 score; clear bonus +20." onFinish={() => { const engine = engineRef.current; if (!engine.running) return; engine.running = false; setGameState('gameover'); finalizeTickets(engine.score, false); }} />
       
       {/* Game Cabinet Top Bar */}
       <div
@@ -650,7 +673,7 @@ export default function BrickBreaker() {
               className="arcade-btn arcade-btn-yellow blink"
               style={{ fontSize: '1rem', padding: '14px 28px', marginBottom: '20px' }}
             >
-              ▶ INSERT COIN &amp; PLAY
+              ▶ FREE PLAY
             </button>
             <div style={{ color: '#718096', fontSize: '0.9rem' }}>
               Controls: <strong>Mouse</strong> or <strong>A/D</strong> or <strong>Arrow Keys</strong>
@@ -673,7 +696,7 @@ export default function BrickBreaker() {
             }}
           >
             <h3 className="pixel-text glow-pink" style={{ fontSize: '1.8rem', color: '#ff007f', marginBottom: '10px' }}>
-              GAME OVER
+              {timedOut.current ? 'TIME UP!' : 'GAME OVER'}
             </h3>
             <div className="pixel-text" style={{ fontSize: '1rem', color: '#ffe600', marginBottom: '10px' }}>
               FINAL SCORE: {score}

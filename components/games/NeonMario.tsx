@@ -1,9 +1,13 @@
 'use client';
+import { effectsEnabled } from '@/lib/chip-audio';
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useTickets } from '@/context/TicketContext';
 import confetti from 'canvas-confetti';
+import { marioReward } from '@/lib/economy';
+import { useCabinetBank } from './useCabinetBank';
+import RoundStatus from './RoundStatus';
 
 interface MysteryBlock {
   id: number;
@@ -64,7 +68,11 @@ interface FloatingScore {
 
 export default function NeonMario() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { tickets, addTickets } = useTickets();
+  const { tickets } = useTickets();
+  const { startBank, updateBank, banked } = useCabinetBank('NeonMario');
+  const [secondsLeft, setSecondsLeft] = useState(90);
+  const deadline = useRef(0);
+  const timedOut = useRef(false);
 
   // Game state
   const [gameState, setGameState] = useState<'idle' | 'playing' | 'gameover' | 'victory'>('idle');
@@ -85,9 +93,9 @@ export default function NeonMario() {
 
   // Synthesized Web Audio effects
   const playSound = useCallback((type: 'jump' | 'coin' | 'bump' | 'stomp' | 'hurt' | 'win' | 'ticket') => {
-    if (isMuted) return;
+    if (isMuted || !effectsEnabled()) return;
     try {
-      if (!audioCtxRef.current) {
+      if (!audioCtxRef.current || audioCtxRef.current.state === 'closed') {
         const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
         audioCtxRef.current = new AudioContextClass();
       }
@@ -284,10 +292,9 @@ export default function NeonMario() {
     if (hasAwardedTicketsRef.current) return;
     hasAwardedTicketsRef.current = true;
 
-    // Formula: 1 ticket per 2 coins + 1 ticket per 80 points + 25 victory bonus
-    const won = Math.max(5, Math.floor(finalCoins * 1.5) + Math.floor(finalScore / 80) + (isWin ? 25 : 0));
+    // 1 per coin + 1 per 160 score + 20 at flagpole.
+    const won = updateBank(marioReward(finalScore, finalCoins, isWin), true);
     setEarnedTicketsThisRound(won);
-    addTickets(won, `Super Neon Plumber ${isWin ? 'Flagpole Victory' : 'Adventure'}`);
     playSound('ticket');
 
     if (isWin) {
@@ -297,11 +304,15 @@ export default function NeonMario() {
         origin: { y: 0.6 }
       });
     }
-  }, [addTickets, playSound]);
+  }, [updateBank, playSound]);
 
   // Start game session
   const startGame = useCallback(() => {
     hasAwardedTicketsRef.current = false;
+    startBank();
+    timedOut.current = false;
+    deadline.current = performance.now() + 90000;
+    setSecondsLeft(90);
     setEarnedTicketsThisRound(0);
 
     const level = buildLevel();
@@ -328,7 +339,7 @@ export default function NeonMario() {
     setCoinsCount(0);
     setLives(3);
     setGameState('playing');
-  }, [buildLevel]);
+  }, [buildLevel, startBank]);
 
   // Main 60 FPS Game Loop
   useEffect(() => {
@@ -338,10 +349,26 @@ export default function NeonMario() {
     if (!ctx) return;
 
     let animId = 0;
+    let lastFrame = 0;
 
-    const gameLoop = () => {
+    const gameLoop = (timestamp: number) => {
+      // Normalize the original frame-based physics to at most 60 updates/sec.
+      if (lastFrame && timestamp - lastFrame < 1000 / 60 - 0.5) { animId = requestAnimationFrame(gameLoop); return; }
+      lastFrame = timestamp;
       const engine = engineRef.current;
       const { player, keys, platforms, mysteryBlocks, coinsList, goombas, particles, floatingScores } = engine;
+
+      if (engine.running) {
+        const remaining = Math.max(0, Math.ceil((deadline.current - performance.now()) / 1000));
+        setSecondsLeft(remaining);
+        updateBank(marioReward(engine.score, engine.coins, false));
+        if (remaining === 0) {
+          timedOut.current = true;
+          engine.running = false;
+          setGameState('gameover');
+          finalizeTickets(engine.score, engine.coins, false);
+        }
+      }
 
       // Clear canvas
       ctx.fillStyle = '#06060f';
@@ -855,11 +882,13 @@ export default function NeonMario() {
     window.addEventListener('keyup', handleKeyUp);
 
     // Initial level layout
+    if (!engineRef.current.platforms.length) {
     const initialLevel = buildLevel();
     engineRef.current.platforms = initialLevel.platforms;
     engineRef.current.mysteryBlocks = initialLevel.mysteryBlocks;
     engineRef.current.coinsList = initialLevel.coinsList;
     engineRef.current.goombas = initialLevel.goombas;
+    }
 
     animId = requestAnimationFrame(gameLoop);
 
@@ -872,10 +901,11 @@ export default function NeonMario() {
         audioCtxRef.current.close().catch(() => {});
       }
     };
-  }, [buildLevel, finalizeTickets, gameState, playSound, startGame]);
+  }, [buildLevel, finalizeTickets, gameState, playSound, startGame, updateBank]);
 
   return (
     <div style={{ maxWidth: '820px', margin: '0 auto', textAlign: 'center' }}>
+      <RoundStatus seconds={secondsLeft} banked={banked} active={gameState === 'playing'} rules="90s round. 1 per coin + 1 per 160 score; flagpole bonus +20." onFinish={() => { const engine = engineRef.current; if (!engine.running) return; engine.running = false; setGameState('gameover'); finalizeTickets(engine.score, engine.coins, false); }} />
       
       {/* Top Status Bar */}
       <div
@@ -979,7 +1009,7 @@ export default function NeonMario() {
               className="arcade-btn arcade-btn-yellow blink"
               style={{ fontSize: '1rem', padding: '14px 28px', marginBottom: '20px' }}
             >
-              ▶ INSERT COIN &amp; PLAY
+              ▶ FREE PLAY
             </button>
             <div style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
               Controls: <strong>A / D</strong> or <strong>Arrow Keys</strong> to Run &bull; <strong>Space / W</strong> to Jump
@@ -1002,7 +1032,7 @@ export default function NeonMario() {
             }}
           >
             <h3 className="pixel-text glow-pink" style={{ fontSize: '2rem', color: '#ff3b30', marginBottom: '12px' }}>
-              GAME OVER
+              {timedOut.current ? 'TIME UP!' : 'GAME OVER'}
             </h3>
             <div className="pixel-text" style={{ fontSize: '1rem', color: '#ffe600', marginBottom: '8px' }}>
               FINAL SCORE: {score} &bull; COINS: {coinsCount}
