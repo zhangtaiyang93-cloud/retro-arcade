@@ -83,7 +83,7 @@ export default function NeonMarioPage() {
             🕹️ <strong>Controls:</strong> A / D or Arrow Keys to run &bull; Space or W to Jump &bull; On-screen touch buttons for mobile.
           </div>
           <div style={{ color: '#ffe600' }}>
-            🎟️ <strong>Rewards:</strong> 1 Ticket per 2 Coins + 1 per 80 Points + 25 Flagpole Bonus!
+            🎟️ <strong>Rewards:</strong> 90s · 1 per coin + 1 per 160 score + 20 flagpole bonus.
           </div>
         </div>
       </div>

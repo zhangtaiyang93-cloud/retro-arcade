@@ -12,9 +12,9 @@ export const PALETTE = {
 
 /** Tickets paid through the shared wallet. Particles, cores and creatures only ever add score. */
 export const REWARDS = {
-  firstLevelClear: 50,
-  laterLevelClear: 75,
-  noDamageBonus: 25
+  firstLevelClear: 20,
+  laterLevelClear: 25,
+  noDamageBonus: 10
 };
 
 export const SCORE = {

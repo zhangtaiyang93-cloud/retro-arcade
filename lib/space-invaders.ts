@@ -1,3 +1,4 @@
+import { invaderWaveBonus } from './economy';
 export const WIDTH = 640;
 export const HEIGHT = 440;
 export type Phase = 'ready' | 'playing' | 'paused' | 'over' | 'won';
@@ -9,7 +10,7 @@ export type GameState = {
   direction: number; cooldown: number; fireTimer: number; invincible: number;
 };
 export function formation(wave: number): Invader[] {
-  return Array.from({ length: 24 }, (_, i) => ({ x: 80 + (i % 8) * 58, y: 48 + Math.floor(i / 8) * 42 + (wave - 1) * 8, row: Math.floor(i / 8) }));
+  return Array.from({ length: 24 }, (_, i) => ({ x: 80 + (i % 8) * 58, y: 48 + Math.floor(i / 8) * 42 + Math.min(wave - 1, 7) * 8, row: Math.floor(i / 8) }));
 }
 export function createGame(): GameState {
   return { phase: 'ready', player: WIDTH / 2, lives: 3, score: 0, wave: 1, earned: 0,
@@ -24,8 +25,8 @@ export function stepGame(g: GameState, dt: number, input: { left: boolean; right
   g.invincible = Math.max(0, g.invincible - dt);
   if (input.fire && g.cooldown <= 0) { g.shots.push({ x: g.player, y: 390 }); g.cooldown = 0.22; }
   for (const shot of g.shots) shot.y -= 480 * dt;
-  for (const bomb of g.bombs) bomb.y += (160 + g.wave * 22) * dt;
-  const speed = 22 + g.wave * 10 + (24 - g.aliens.length) * 2;
+  for (const bomb of g.bombs) bomb.y += Math.min(330, 160 + g.wave * 22) * dt;
+  const speed = Math.min(140, 22 + g.wave * 10 + (24 - g.aliens.length) * 2);
   for (const alien of g.aliens) alien.x += g.direction * speed * dt;
   if (g.aliens.some(a => a.x < 22 || a.x > WIDTH - 22)) {
     g.direction *= -1;
@@ -37,9 +38,10 @@ export function stepGame(g: GameState, dt: number, input: { left: boolean; right
     g.bombs.push({ x: alien.x, y: alien.y + 14 });
     g.fireTimer = Math.max(0.28, 1.05 - g.wave * 0.18);
   }
+  let earnedNow = 0;
   for (const shot of g.shots) {
     const index = g.aliens.findIndex(a => Math.abs(a.x - shot.x) < 20 && Math.abs(a.y - shot.y) < 16);
-    if (index >= 0) { g.score += (3 - g.aliens[index].row) * 10; g.aliens.splice(index, 1); shot.y = -100; }
+    if (index >= 0) { g.score += (3 - g.aliens[index].row) * 10; earnedNow++; g.earned++; g.aliens.splice(index, 1); shot.y = -100; }
   }
   g.shots = g.shots.filter(s => s.y > -10);
   g.bombs = g.bombs.filter(b => {
@@ -49,14 +51,14 @@ export function stepGame(g: GameState, dt: number, input: { left: boolean; right
     }
     return b.y < HEIGHT + 10;
   });
-  if (g.lives <= 0 || g.aliens.some(a => a.y >= 374)) { g.phase = 'over'; return 0; }
+  if (g.lives <= 0 || g.aliens.some(a => a.y >= 374)) { g.phase = 'over'; return earnedNow; }
   if (!g.aliens.length) {
-    const reward = g.wave * 10;
+    const reward = invaderWaveBonus(g.wave);
     g.earned += reward;
     g.shots = []; g.bombs = [];
-    if (g.wave === 3) g.phase = 'won';
-    else { g.wave++; g.aliens = formation(g.wave); g.direction = 1; g.fireTimer = 1; g.invincible = 1.6; }
-    return reward;
+    g.wave++;
+    g.aliens = formation(g.wave); g.direction = 1; g.fireTimer = 1; g.invincible = 1.6;
+    return earnedNow + reward;
   }
-  return 0;
+  return earnedNow;
 }

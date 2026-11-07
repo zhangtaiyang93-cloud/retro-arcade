@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useTickets } from '@/context/TicketContext';
+import { useCabinetBank } from './useCabinetBank';
+import RoundStatus from './RoundStatus';
 import { createGame, stepGame, WIDTH, HEIGHT, type GameState } from '@/lib/space-invaders';
 import styles from './SpaceInvaders.module.css';
 
@@ -30,16 +31,17 @@ export default function SpaceInvaders() {
   const canvas = useRef<HTMLCanvasElement>(null);
   const game = useRef(createGame());
   const input = useRef({ left: false, right: false, fire: false });
-  const { addTickets } = useTickets();
-  const award = useRef(addTickets);
+  const { startBank, updateBank, banked } = useCabinetBank('Space Invaders');
+  const award = useRef(updateBank);
   const [hud, setHud] = useState({ phase: game.current.phase, score: 0, lives: 3, wave: 1, earned: 0 });
-  useEffect(() => { award.current = addTickets; }, [addTickets]);
+  useEffect(() => { award.current = updateBank; }, [updateBank]);
   const clearInput = () => { input.current = { left: false, right: false, fire: false }; };
   const publish = () => {
     const { phase, score, lives, wave, earned } = game.current;
     setHud(old => old.phase === phase && old.score === score && old.lives === lives && old.wave === wave && old.earned === earned ? old : { phase, score, lives, wave, earned });
   };
   const start = () => {
+    startBank();
     game.current = createGame(); game.current.phase = 'playing'; clearInput(); publish(); canvas.current?.focus();
   };
   const pause = () => {
@@ -55,7 +57,7 @@ export default function SpaceInvaders() {
     const tick = (now: number) => {
       const reward = stepGame(game.current, last ? (now - last) / 1000 : 0, input.current);
       last = now;
-      if (reward) award.current(reward, `Space Invaders wave cleared`);
+      award.current(game.current.earned, game.current.phase === 'over');
       draw(ctx, game.current); publish(); frame = requestAnimationFrame(tick);
     };
     const suspend = () => {
@@ -70,8 +72,9 @@ export default function SpaceInvaders() {
   }, []);
   return (
     <section className={styles.game} aria-label="Space Invaders game">
+      <RoundStatus banked={banked} active={hud.phase === 'playing' || hud.phase === 'paused'} rules="1 per alien + 6–18 per wave. Faster enemies and lasers every wave." onFinish={() => { game.current.phase = 'over'; award.current(game.current.earned, true); publish(); }} />
       <div className={styles.hud} aria-live="polite">
-        <span>SCORE {String(hud.score).padStart(5, '0')}</span><span>WAVE {hud.wave}/3</span><span>LIVES {hud.lives}</span><span>+{hud.earned} TICKETS</span>
+        <span>SCORE {String(hud.score).padStart(5, '0')}</span><span>WAVE {hud.wave}</span><span>LIVES {hud.lives}</span><span>+{banked} TICKETS</span>
       </div>
       <div className={styles.stage}>
         <canvas ref={canvas} className={styles.canvas} width={WIDTH} height={HEIGHT} tabIndex={0}
@@ -93,7 +96,7 @@ export default function SpaceInvaders() {
           }}>Use a browser with Canvas support to play Space Invaders.</canvas>
         {hud.phase !== 'playing' && <div className={styles.overlay}>
           <h3 className="pixel-text">{hud.phase === 'ready' ? 'DEFEND THE EARTH' : hud.phase === 'paused' ? 'PAUSED' : hud.phase === 'won' ? 'EARTH IS SAFE!' : 'GAME OVER'}</h3>
-          <p>{hud.phase === 'ready' ? 'Clear 3 waves. Dodge enemy fire. Earn 10 / 20 / 30 tickets per wave.' : hud.phase === 'paused' ? 'Take a breath. Your mission is waiting.' : `Score ${hud.score} · ${hud.earned} tickets added to your wallet.`}</p>
+          <p>{hud.phase === 'ready' ? 'Endless waves. 1 ticket per alien, plus 6–18 per cleared wave. Difficulty rises.' : hud.phase === 'paused' ? 'Take a breath. Your mission is waiting.' : `Score ${hud.score} · ${banked} tickets added to your wallet.`}</p>
           <button className="arcade-btn arcade-btn-yellow" onClick={hud.phase === 'paused' ? () => { pause(); canvas.current?.focus(); } : start}>
             {hud.phase === 'ready' ? 'START MISSION' : hud.phase === 'paused' ? 'RESUME' : 'PLAY AGAIN'}
           </button>

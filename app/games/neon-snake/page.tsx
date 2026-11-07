@@ -83,7 +83,7 @@ export default function NeonSnakePage() {
             🕹️ <strong>Controls:</strong> WASD or Arrow Keys to turn &bull; On-screen virtual D-Pad for mobile.
           </div>
           <div style={{ color: '#ffe600' }}>
-            🎟️ <strong>Rewards:</strong> 1 Ticket per 3 Orbs + 1 per 80 Score!
+            🎟️ <strong>Rewards:</strong> Endless · 2 per orb + 5 per golden orb, banked live.
           </div>
         </div>
       </div>

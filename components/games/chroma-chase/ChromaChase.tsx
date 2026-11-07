@@ -2,7 +2,8 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useTickets } from '@/context/TicketContext';
+import { useCabinetBank } from '../useCabinetBank';
+import RoundStatus from '../RoundStatus';
 import { SynthAudio } from './audio';
 import { GAME, LEVELS, REWARDS } from './config';
 import { ChromaChaseGame, Dir, GameEvent, Status } from './engine';
@@ -56,6 +57,7 @@ interface Hud {
   level: number;
   surge: number;
   countdown: number;
+  roundSeconds: number;
   ticketsLastLevel: number;
   ticketsTotal: number;
 }
@@ -68,6 +70,7 @@ const INITIAL_HUD: Hud = {
   level: 0,
   surge: 0,
   countdown: 0,
+  roundSeconds: 180,
   ticketsLastLevel: 0,
   ticketsTotal: 0
 };
@@ -75,7 +78,9 @@ const INITIAL_HUD: Hud = {
 const ACTIVE_STATUSES: Status[] = ['ready', 'playing', 'hit', 'levelclear'];
 
 export default function ChromaChase() {
-  const { addTickets } = useTickets();
+  const { startBank, updateBank, banked } = useCabinetBank('Chroma Chase');
+  const collected = useRef(0);
+  const bonus = useRef(0);
   const [hud, setHud] = useState<Hud>(INITIAL_HUD);
   const [muted, setMuted] = useState(false);
 
@@ -87,16 +92,12 @@ export default function ChromaChase() {
   const rendererRef = useRef<ChromaRenderer | null>(null);
   const audioRef = useRef<SynthAudio>(audio);
   const sessionIdRef = useRef<string>('');
-  const addTicketsRef = useRef(addTickets);
   const highRef = useRef(0);
   const ticketsRef = useRef({ lastLevel: 0, total: 0 });
   const hudRef = useRef<Hud>(INITIAL_HUD);
   const swipeRef = useRef<{ x: number; y: number } | null>(null);
   const loopsRef = useRef(0);
 
-  useEffect(() => {
-    addTicketsRef.current = addTickets;
-  }, [addTickets]);
 
   const saveHighScore = useCallback(() => {
     try {
@@ -111,7 +112,7 @@ export default function ChromaChase() {
     let earned = 0;
     for (const reward of rewardsForLevelClear(sessionIdRef.current, level, noDamage)) {
       if (claimOnce(reward.achievementId)) {
-        addTicketsRef.current(reward.amount, reward.reason);
+        bonus.current += reward.amount;
         earned += reward.amount;
       }
     }
@@ -124,6 +125,9 @@ export default function ChromaChase() {
       switch (event.type) {
         case 'particle':
         case 'core':
+          collected.current++;
+          audioRef.current.play(event.type);
+          break;
         case 'caught':
         case 'hit':
         case 'blink':
@@ -155,9 +159,10 @@ export default function ChromaChase() {
       lives: game.lives,
       level: game.level,
       surge: Math.ceil(game.surgeLeft * 10) / 10,
+      roundSeconds: Math.ceil(game.roundSeconds),
       countdown: game.status === 'ready' ? Math.ceil(game.timer) : 0,
       ticketsLastLevel: ticketsRef.current.lastLevel,
-      ticketsTotal: ticketsRef.current.total
+      ticketsTotal: updateBank(Math.floor(collected.current / 6) + bonus.current, game.status === 'gameover' || game.status === 'victory')
     };
     const previous = hudRef.current;
     const changed = (Object.keys(next) as Array<keyof Hud>).some((key) => next[key] !== previous[key]);
@@ -165,12 +170,15 @@ export default function ChromaChase() {
       hudRef.current = next;
       setHud(next);
     }
-  }, []);
+  }, [updateBank]);
 
   /** Every new game gets a new session, so restarting can't re-trigger a claimed achievement. */
   const beginSession = useCallback(() => {
     audioRef.current.unlock();
     saveHighScore();
+    startBank();
+    collected.current = 0;
+    bonus.current = 0;
     sessionIdRef.current = createSessionId();
     ticketsRef.current = { lastLevel: 0, total: 0 };
     const game = new ChromaChaseGame();
@@ -181,7 +189,7 @@ export default function ChromaChase() {
     stageRef.current?.focus({ preventScroll: true });
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     stageRef.current?.scrollIntoView({ block: 'center', behavior: reduced ? 'auto' : 'smooth' });
-  }, [saveHighScore, syncHud]);
+  }, [saveHighScore, syncHud, startBank]);
 
   const togglePause = useCallback(() => {
     audioRef.current.unlock();
@@ -248,7 +256,9 @@ export default function ChromaChase() {
 
     const frame = (now: number) => {
       frameId = requestAnimationFrame(frame);
-      const elapsed = Math.min((now - last) / 1000, 0.1);
+      const wallElapsed = Math.max(0, (now - last) / 1000);
+      gameRef.current.elapseWallTime(wallElapsed);
+      const elapsed = Math.min(wallElapsed, 0.1);
       last = now;
       accumulator += elapsed;
       const game = gameRef.current;
@@ -364,6 +374,7 @@ export default function ChromaChase() {
 
   return (
     <div className={styles.root}>
+      <RoundStatus seconds={hud.roundSeconds} banked={banked} active={ACTIVE_STATUSES.includes(status) || status === 'paused'} rules="180s total, including pauses. 1 per 6 pickups; level bonuses 20/25/25; +10 for a clean level." onFinish={() => { gameRef.current.status = 'gameover'; syncHud(); }} />
       <div className={styles.topBar}>
         <Link href="/" className="arcade-btn" style={{ fontSize: '0.7rem', padding: '8px 12px' }}>
           &larr; Floor
@@ -439,7 +450,7 @@ export default function ChromaChase() {
 
           {status === 'gameover' && (
             <div className={styles.overlay} aria-live="polite">
-              <p className={styles.glitch} data-text="SIGNAL LOST">SIGNAL LOST</p>
+              <p className={styles.glitch} data-text={gameRef.current.timedOut ? 'TIME UP' : 'SIGNAL LOST'}>{gameRef.current.timedOut ? 'TIME UP' : 'SIGNAL LOST'}</p>
               <p className={styles.overlayLead}>Score {hud.score.toLocaleString()} &bull; {hud.ticketsTotal} 🎟️ earned</p>
               <button type="button" className="arcade-btn arcade-btn-yellow" onClick={beginSession} autoFocus>
                 Try again

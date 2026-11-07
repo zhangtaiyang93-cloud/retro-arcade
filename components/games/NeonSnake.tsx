@@ -1,9 +1,13 @@
 'use client';
+import { effectsEnabled } from '@/lib/chip-audio';
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useTickets } from '@/context/TicketContext';
 import confetti from 'canvas-confetti';
+import { snakeReward } from '@/lib/economy';
+import { useCabinetBank } from './useCabinetBank';
+import RoundStatus from './RoundStatus';
 
 interface Point {
   x: number;
@@ -34,7 +38,8 @@ const CELL_SIZE = 20; // 440 x 440 px canvas
 
 export default function NeonSnake() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { tickets, addTickets } = useTickets();
+  const { tickets } = useTickets();
+  const { startBank, updateBank, banked } = useCabinetBank('Cyber Neon Snake');
 
   // State
   const [gameState, setGameState] = useState<'idle' | 'playing' | 'gameover'>('idle');
@@ -55,9 +60,9 @@ export default function NeonSnake() {
 
   // Web Audio synthesizer
   const playSound = useCallback((type: 'eat' | 'bonus' | 'die' | 'ticket') => {
-    if (isMuted) return;
+    if (isMuted || !effectsEnabled()) return;
     try {
-      if (!audioCtxRef.current) {
+      if (!audioCtxRef.current || audioCtxRef.current.state === 'closed') {
         const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
         audioCtxRef.current = new AudioContextClass();
       }
@@ -131,6 +136,7 @@ export default function NeonSnake() {
     bonusFood: null as (Point & { timer: number }) | null,
     score: 0,
     foodsEaten: 0,
+    goldenEaten: 0,
     speedMs: 115,
     lastTick: 0,
     particles: [] as Particle[],
@@ -140,16 +146,11 @@ export default function NeonSnake() {
 
   // Spawn random food
   const spawnFood = (snake: Point[]): Point => {
-    let newFood: Point;
-    while (true) {
-      newFood = {
-        x: Math.floor(Math.random() * GRID_SIZE),
-        y: Math.floor(Math.random() * GRID_SIZE)
-      };
-      const hit = snake.some((seg) => seg.x === newFood.x && seg.y === newFood.y);
-      if (!hit) break;
+    const free: Point[] = [];
+    for (let y = 0; y < GRID_SIZE; y++) for (let x = 0; x < GRID_SIZE; x++) {
+      if (!snake.some(seg => seg.x === x && seg.y === y)) free.push({ x, y });
     }
-    return newFood;
+    return free[Math.floor(Math.random() * free.length)] ?? { x: 0, y: 0 };
   };
 
   // Finalize tickets on game over
@@ -157,10 +158,9 @@ export default function NeonSnake() {
     if (hasAwardedTicketsRef.current) return;
     hasAwardedTicketsRef.current = true;
 
-    // 1 ticket per 3 food eaten + 1 ticket per 80 score
-    const won = Math.max(5, Math.floor(finalFoods / 3) + Math.floor(finalScore / 80));
+    // No death bonus; report tickets already banked during survival.
+    const won = updateBank(snakeReward(finalFoods, engineRef.current.goldenEaten), true);
     setEarnedTicketsThisRound(won);
-    addTickets(won, 'Cyber Neon Snake Game');
     playSound('ticket');
 
     if (won >= 15) {
@@ -170,11 +170,12 @@ export default function NeonSnake() {
         origin: { y: 0.6 }
       });
     }
-  }, [addTickets, playSound]);
+  }, [updateBank, playSound]);
 
   // Start / Restart game
   const startGame = useCallback(() => {
     hasAwardedTicketsRef.current = false;
+    startBank();
     setEarnedTicketsThisRound(0);
 
     const initialSnake: Point[] = [
@@ -191,6 +192,7 @@ export default function NeonSnake() {
     engine.bonusFood = null;
     engine.score = 0;
     engine.foodsEaten = 0;
+    engine.goldenEaten = 0;
     engine.speedMs = 115;
     engine.lastTick = 0;
     engine.particles = [];
@@ -200,7 +202,7 @@ export default function NeonSnake() {
     setScore(0);
     setFoodCount(0);
     setGameState('playing');
-  }, []);
+  }, [startBank]);
 
   // Direction changer helper (Guards against 180° instant suicide)
   const setDirection = useCallback((dx: number, dy: number) => {
@@ -225,6 +227,7 @@ export default function NeonSnake() {
 
       // Handle Logic Tick based on speedMs
       if (engine.running) {
+        updateBank(snakeReward(engine.foodsEaten, engine.goldenEaten));
         if (!engine.lastTick) engine.lastTick = timestamp;
         const elapsed = timestamp - engine.lastTick;
 
@@ -249,7 +252,10 @@ export default function NeonSnake() {
             newHead.y >= GRID_SIZE;
 
           // Check Self Collision
-          const hitSelf = snake.some((seg) => seg.x === newHead.x && seg.y === newHead.y);
+          const grows = (newHead.x === engine.food.x && newHead.y === engine.food.y) ||
+            (engine.bonusFood?.x === newHead.x && engine.bonusFood?.y === newHead.y);
+          const collisionBody = grows ? snake : snake.slice(0, -1);
+          const hitSelf = collisionBody.some((seg) => seg.x === newHead.x && seg.y === newHead.y);
 
           if (hitWall || hitSelf) {
             engine.running = false;
@@ -309,7 +315,7 @@ export default function NeonSnake() {
               });
 
               // Speed up slightly as snake grows
-              engine.speedMs = Math.max(65, 115 - Math.floor(engine.foodsEaten / 3) * 3);
+              engine.speedMs = Math.max(55, 115 - engine.foodsEaten * 2);
 
               // Spawn next regular food
               engine.food = spawnFood(snake);
@@ -317,11 +323,12 @@ export default function NeonSnake() {
               // Every 5 foods eaten, spawn a Golden Bonus Orb!
               if (engine.foodsEaten % 5 === 0 && !engine.bonusFood) {
                 engine.bonusFood = {
-                  ...spawnFood(snake),
+                  ...spawnFood([...snake, engine.food]),
                   timer: 60 // ~6 seconds
                 };
               }
             } else if (ateBonusFood) {
+              engine.goldenEaten++;
               engine.score += 50;
               setScore(engine.score);
               playSound('bonus');
@@ -351,6 +358,10 @@ export default function NeonSnake() {
               // Pop tail if no food eaten
               snake.pop();
             }
+
+            // Keep free cells available so survival can continue indefinitely.
+            while (snake.length > 180) snake.pop();
+            updateBank(snakeReward(engine.foodsEaten, engine.goldenEaten));
 
             // Decrement bonus food timer
             if (engine.bonusFood) {
@@ -558,10 +569,11 @@ export default function NeonSnake() {
         audioCtxRef.current.close().catch(() => {});
       }
     };
-  }, [finalizeTickets, gameState, highScore, playSound, setDirection, startGame]);
+  }, [finalizeTickets, gameState, highScore, playSound, setDirection, startGame, updateBank]);
 
   return (
     <div style={{ maxWidth: '640px', margin: '0 auto', textAlign: 'center' }}>
+      <RoundStatus banked={banked} active={gameState === 'playing'} rules="2 tickets per orb, 5 per gold orb. Speed rises to 55ms per step; body grows to 180 segments." onFinish={() => { const engine = engineRef.current; if (!engine.running) return; engine.running = false; setGameState('gameover'); finalizeTickets(engine.score, engine.foodsEaten); }} />
       
       {/* Top Status Header */}
       <div
@@ -665,7 +677,7 @@ export default function NeonSnake() {
               className="arcade-btn arcade-btn-yellow blink"
               style={{ fontSize: '1rem', padding: '14px 28px', marginBottom: '16px' }}
             >
-              ▶ INSERT COIN &amp; PLAY
+              ▶ FREE PLAY
             </button>
             <div style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
               Controls: <strong>WASD</strong> or <strong>Arrow Keys</strong> or <strong>D-Pad</strong>

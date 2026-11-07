@@ -2,10 +2,13 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { TicketProvider } from '@/context/TicketContext';
 import Header from '@/components/Header';
+import NightExperience from '@/components/NightExperience';
+import MusicPlayer from '@/components/MusicPlayer';
+import MusicCredit from '@/components/MusicCredit';
 
 export const metadata: Metadata = {
-  title: 'Retro Arcade | Prototyping for Masters 2026',
-  description: 'A retro arcade platform with classic mini-games, ticket wallet, and prize counter.',
+  title: 'Before Closing | Retro Arcade',
+  description: 'Walk through a neon arcade, discover forgotten tickets, play six cabinets and take home prizes.',
 };
 
 export default function RootLayout({
@@ -17,6 +20,8 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <TicketProvider>
+          <MusicPlayer />
+          <NightExperience>
           <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
             <Header />
             <main style={{ flex: 1, paddingBottom: '60px' }}>
@@ -36,10 +41,12 @@ export default function RootLayout({
                 🕹️ RETRO ARCADE FLOOR &bull; PROTOTYPING FOR MASTERS 2026
               </div>
               <p>
-                Collaborative team arcade project. Build on your game branch, merge PRs, and win prizes!
+                One last round. Take home something worth staying up for.
               </p>
+              <MusicCredit />
             </footer>
           </div>
+          </NightExperience>
         </TicketProvider>
       </body>
     </html>

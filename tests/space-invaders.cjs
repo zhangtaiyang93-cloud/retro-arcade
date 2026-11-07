@@ -9,13 +9,13 @@ const { createGame, stepGame } = require(path.join(output, 'space-invaders.js'))
 const assert = require('node:assert/strict');
 const idle = { left: false, right: false, fire: false };
 const g = createGame(); g.phase = 'playing';
-for (const reward of [10, 20, 30]) {
+for (const reward of [7, 9, 11]) {
   g.aliens = [{ x: 100, y: 100, row: 0 }];
   g.shots = [{ x: 100, y: 100 }];
   assert.equal(stepGame(g, 0, idle), reward);
   assert.equal(stepGame(g, 0, idle), 0, 'reward is not repeated');
 }
-assert.equal(g.earned, 60); assert.equal(g.phase, 'won');
+assert.equal(g.earned, 27); assert.equal(g.phase, 'playing'); assert.equal(g.wave, 4);
 const paused = createGame(); paused.phase = 'paused';
 assert.equal(stepGame(paused, .04, { left: true, right: false, fire: true }), 0);
 assert.equal(paused.player, 320); assert.equal(paused.shots.length, 0);
@@ -31,4 +31,4 @@ stepGame(invasion, 0, idle); assert.equal(invasion.phase, 'over');
 const bounds = createGame(); bounds.phase = 'playing'; bounds.player = 20;
 stepGame(bounds, 20, { ...idle, left: true }); assert.equal(bounds.player, 20);
 assert.equal(createGame().earned, 0); assert.equal(createGame().score, 0);
-console.log('Passed: wave payouts once, victory, pause, loss, invulnerability, invasion, bounds and restart.');
+console.log('Passed: kill and wave payouts once, endless progression, pause, loss, invulnerability, invasion, bounds and restart.');

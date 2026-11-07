@@ -1,0 +1,21 @@
+Generated with built-in image_gen.
+
+BACKGROUND EDIT
+Use case: precise-object-edit. Asset: production video game background.
+Input image is the EDIT TARGET. Preserve this approved chunky pixel-art arcade EXACTLY as closely as possible: identical wide 3:1 framing, same camera, same geometry and locations of all six cabinets, doorway, prize counter, sleeping owner, trash can, snack vending machine, stools, columns, floor, clutter, black foreground cabinet silhouettes, signs and colored neon lights.
+Make ONLY THREE removals:
+1. Remove the streetwear protagonist standing near the lower middle-left. Seamlessly reconstruct the checkerboard floor and any scenery behind him. There must be NO player character anywhere.
+2. Remove the entire top heads-up display: BEFORE CLOSING, 30:00, tickets/prizes, pause/speaker icons and their enclosing colored borders. Replace this strip with a natural continuation of the upper wall/ceiling pipes and bricks. Do NOT crop the image or shift existing cabinets downward.
+3. Remove the lower-left black controls strip and all its letters/border. Reconstruct the foreground silhouettes and floor behind this strip.
+Keep the actual scene signs EXIT, INVADERS, CHROMA, BRICKS, PLUMBER, SNAKE, NEON LUCK, SNACKS and PRIZES untouched. No new UI, no ticket loot, no raccoon, no sparkles, no added people or highlights. Preserve strongest-brightness lighting, pixel texture, original palette and all other scenery. Full bleed landscape PNG, same 3:1 aspect.
+
+RACCOON SPRITE
+Use case: stylized-concept.
+Asset: ONE isolated transparent game sprite for a small raccoon briefly peeking out of a trash can in a 1990s neon pixel-art arcade.
+Primary request: a mischievous funny RACCOON HEAD with TWO FRONT PAWS resting at the bottom edge, facing slightly right in a near-frontal three-quarter view. ONLY the head, ears, and two paws. No body or tail, no trash can, no props, no text. Cheeky mildly grumpy expression with bright little eyes, characteristic dark raccoon eye-mask, grey fur, pale snout, black nose.
+Style: visibly chunky low-resolution 16-bit pixel art, logically about 64 by 64 pixels rendered larger with hard square pixels and stepped contours, limited color ramps, absolutely no smooth lines or antialias illustration. Dark purple shadow outlines, warm grey face, subtle cyan light from left and magenta edge light from right to match a neon arcade. Whole head and paws fit well inside square frame with transparent space around, no cropping.
+Background: TRUE transparent alpha, no checkerboard painted in, no shadow plane, no backdrop, no glow cloud. A single usable game sprite, no sprite sheet and no extra poses.
+
+IDLE SPRITE (built-in image_gen; final prompt)
+Create ONE isolated full-body game sprite on a truly transparent background. References show the character identity; do NOT copy their backgrounds or glow. Original arcade streetwear protagonist in a neutral idle pose facing RIGHT in three-quarter side view. Both feet flat on same baseline, arms at rest. Backwards burgundy cap, dark short hair, warm tan skin, teal baggy bomber jacket with magenta shoulders and cream sleeve stripes, black crop top, wide dark charcoal cargo pants, silver hip chain, big cream sneakers with burgundy soles. Same proportions and identity as the walking sheet reference. Chunky 16-bit pixel art with hard square outlines and solid opaque pixel colors. ONE pose, full body, no grid, no text, no decorations.
+CRITICAL: character pixels must be completely opaque, surrounding space must be fully transparent alpha. NO halo, NO bloom, NO lighting spill, NO mist, NO drop shadow, NO gradients outside the character, NO ground. Clean hard-edged cutout. The character fills 90% of portrait canvas height.

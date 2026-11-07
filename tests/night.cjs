@@ -1,0 +1,28 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),ts=require('typescript');
+function load(file){const module={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{module,exports:module.exports});return module.exports;}
+const n=load('lib/night.ts'),prizes=load('lib/prizes.ts').PRIZES;
+assert.equal(prizes.length,6); assert.equal(prizes.reduce((sum,p)=>sum+p.cost,0),n.ALL_PRIZES_COST);
+assert.equal(n.OWNER_TICKETS,9350);
+const run={id:'a-night',startedAt:1000,deadline:1000+n.NIGHT_MS,status:'playing',slotNet:0};
+assert.equal(n.timeLeft(run,run.startedAt),1800000);
+assert.equal(n.canEarn(null,1000),false);
+assert.equal(n.canEarn(run,run.deadline-1),true);
+assert.equal(n.canEarn(run,run.deadline),false);
+assert.equal(n.settleNight(run,'exit',0,6,run.deadline-1).result.ending,'complete');
+assert.equal(n.settleNight(run,'exit',10000,6,run.deadline).result.ending,'closing');
+assert.equal(n.settleNight(run,'timeout',10000,6,run.deadline).result.reason,'timeout');
+assert.equal(n.settleNight(run,'exit',0,5,2000).result.ending,'closing');
+assert.equal(n.settleNight({...run,slotNet:9950},'exit',9350,0,2000).result.ending,'owner');
+assert.equal(n.settleNight({...run,slotNet:9950},'exit',9349,0,2000).result.ending,'closing');
+assert.equal(n.settleNight(run,'exit',9350,0,2000).result.ending,'closing');
+const ended=n.settleNight({...run,slotNet:9950},'exit',10000,6,2000);
+assert.equal(ended.result.ending,'owner','Owner takes precedence over all prizes');
+assert.equal(n.settleNight(ended,'timeout',0,0,9999999),ended);
+assert.equal(n.canEarn(ended,2000),false);
+assert.equal(n.timeLeft(ended,2000),0);
+assert.equal(n.parseNight(JSON.stringify(run)).deadline,run.deadline);
+assert.equal(n.timeLeft(n.parseNight(JSON.stringify(run)),run.deadline+100000),0);
+assert.equal(n.parseNight(JSON.stringify(ended)).result.ending,'owner');
+for(const bad of [null,'{','{}',JSON.stringify({...run,deadline:1000}),JSON.stringify({...run,status:'ended'}),JSON.stringify({...run,slotNet:null})])assert.equal(n.parseNight(bad),null);
+assert.equal(n.formatClock(n.NIGHT_MS),'30:00'); assert.equal(n.formatClock(1),'00:01'); assert.equal(n.formatClock(-1),'00:00');
+console.log('PASS: real prize cost, 30-minute wall clock, late-reward cutoff, all three ending conditions, exact jackpot boundary, timeout priority, saved results and corrupt session recovery.');
